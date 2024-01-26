@@ -222,11 +222,27 @@ def main():
     model = ViT(num_prompts=10, trainable_pos_embed=True) # Create the VPT model
     model = model.to(device) # Move the model to the specified device
 
+    # Freeze the ViT model parameters and unfreeze the visual prompts and positional embeddings
+    for name, param in model.named_parameters():
+        if "prompt" in name or "pos_embed" in name or "head" in name:
+            param.requires_grad = True
+        else:
+            param.requires_grad = False
+
     # Set information about the training process
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(),
-                                 lr=ops.lr,
-                                 weight_decay=5e-5)
+    """
+    It is important to use the filter() function?
+    Yes it is!
+    Although we definded the paramters intended for training to have requires_grad = True,
+    using the 'filter' makes it clear which parameters are tinteded for training.
+    filter() also helps reduce overhead.
+    Thus, it is very important to use the function!!
+    """
+    optimizer = torch.optim.Adam(
+        filter(lambda p: p.requires_grad, model.parameters()),
+        lr=ops.lr, weight_decay=5e-5
+    )
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=ops.epoch, eta_min=1e-5)
     os.makedirs(ops.log_dir, exist_ok=True)
 

@@ -9,6 +9,7 @@ Import this file to use the VPT module!
 # 1. Import necessary libraries
 import torch
 import torch.nn as nn
+import torch.nn.init as init
 
 
 class Prompt(nn.Module):
@@ -20,6 +21,16 @@ class Prompt(nn.Module):
         self.prompt_embeddings = nn.ModuleList(
             [nn.Parameter(torch.randn(num_prompts, embed_dim)) for _ in range(num_layers)]
         )
+        self.initialize_embeddings()
+
+
+    def initialize_embeddings(self):
+        """
+        Performs Xavier initialization to the prompt embeddings
+        """
+        for embedding in self.prompt_embeddings:
+            init.xavier_uniform_(embedding)  # Xavier uniform initialization
+
 
     def forward(self, x, layer_idx):
         if layer_idx >= self.num_layers:
