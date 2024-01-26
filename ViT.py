@@ -1,4 +1,13 @@
 """
+Let's begin
+In this code, I will use a pre-trained ViT model (ViT-Base/16) pre-trained on ImageNet21k
+Then, fine-tune the model on CIFAR10.
+I will use visual prompt tuning method for fine-tuning the pre-trained model
+Let's go!!
+"""
+
+
+"""!
     1. Import Necessary Modules!
 """
 import os
@@ -13,7 +22,7 @@ from torchvision.datasets.cifar import CIFAR10
 from tensorboardX import SummaryWriter
 
 from VPT import Prompt # imports the Visual Prompt Deep module from the VPT file
-
+import timm
 
 """
     2. Define the ViT Model
@@ -218,11 +227,17 @@ def main():
     test_loader = DataLoader(dataset=test_set,
                              shuffle=False,
                              batch_size=ops.batch_size)
-
+    """
     # Create the model instance
+    
     model = ViT(num_prompts=10, trainable_pos_embed=True) # Create the VPT model
     model = model.to(device) # Move the model to the specified device
+    """
+    # Load the pre-trained ViT model
+    model = timm.create_model('vit_base_patch16_224', pretrained=True)
+    model = model.to(device) # Move the model to the specified device
 
+    
     # Freeze the ViT model parameters and unfreeze the visual prompts and positional embeddings
     for name, param in model.named_parameters():
         if "prompt" in name or "pos_embed" in name or "head" in name:
