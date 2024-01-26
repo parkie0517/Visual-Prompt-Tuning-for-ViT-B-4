@@ -211,6 +211,24 @@ class NewEmbeddingLayer(nn.Module):
         return z
 
 
+class ViT_Prompt(nn.Module):
+    def __init__(self, original_model):
+        super().__init__()
+        self.model = original_model
+        self.prompt = Prompt(12, 50, 768) # num_layers=12, num_prompts=50, embed_dim=768):
+
+    def forward(self, x):
+        x = self.model.patch_embed(x)
+        x = self.prompt(x)  # Add visual prompts
+
+
+        x = x + self.model.pos_embed
+        x = self.model.pos_drop(x)
+
+        x = self.model.blocks(x)
+        x = self.model.norm(x)
+        return self.model.head(x[:, 0])
+
 def main():
     # argparser
     parer = argparse.ArgumentParser()
@@ -266,7 +284,8 @@ def main():
     model = model.to(device) # Move the model to the specified device
     """
     # Load the pre-trained ViT model
-    model = timm.create_model('vit_base_patch16_224', pretrained=True)
+    pre_trained_model = timm.create_model('vit_base_patch16_224', pretrained=True)
+    model = ViT_Prompt(pre_trained_model)
     model = model.to(device) # Move the model to the specified device
 
 
