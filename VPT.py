@@ -18,9 +18,9 @@ class Prompt(nn.Module):
         self.num_layers = num_layers
         self.num_prompts = num_prompts
         self.embed_dim = embed_dim
-        self.prompt_embeddings = nn.ModuleList(
-            [nn.Parameter(torch.randn(num_prompts, embed_dim)) for _ in range(num_layers)]
-        )
+
+        self.prompt_embeddings = nn.Parameter(torch.randn(num_layers, num_prompts, embed_dim))
+        
         self.initialize_embeddings()
 
 

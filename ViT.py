@@ -118,7 +118,8 @@ class Block(nn.Module):
 # Define the ViT model
 class ViT(nn.Module):
     def __init__(self, img_size=32, patch_size=4, in_chans=3, num_classes=10, embed_dim=192, depth=12,
-                 num_heads=12, mlp_ratio=2., qkv_bias=False, drop_rate=0., attn_drop_rate=0., num_prompts=10): # Define the number of prompts for each layer of the ViT
+                 num_heads=12, mlp_ratio=2., qkv_bias=False, drop_rate=0., attn_drop_rate=0., 
+                 num_prompts=10, trainable_pos_embed=True): # Define the number of prompts for each layer of the ViT
         super().__init__()
         self.num_classes = num_classes
         self.num_features = self.embed_dim = embed_dim  # num_features for consistency with other models
@@ -160,7 +161,7 @@ class ViT(nn.Module):
         # For loop
         # x = self.blocks(x)
         for i, block in enumerate(self.blocks):
-            x = self.visual_prompt(x, layer_idx=i)
+            x = self.prompt(x, layer_idx=i)
             x = block(x)
         
 
@@ -172,7 +173,7 @@ class ViT(nn.Module):
 def main():
     # argparser
     parer = argparse.ArgumentParser()
-    parer.add_argument('--epoch', type=int, default=50)
+    parer.add_argument('--epoch', type=int, default=10)
     parer.add_argument('--batch_size', type=int, default=128)
     parer.add_argument('--lr', type=float, default=0.001)
     parer.add_argument('--step_size', type=int, default=100)
@@ -319,6 +320,6 @@ def main():
 
 
 if __name__ == '__main__':
-    writer = SummaryWriter('./logs/') # Write training results in './logs/' directory
+    writer = SummaryWriter('./logs/test/Add_prompts_to_ViT') # Write training results in './logs/' directory
     main()
     writer.close() # Must include this code when finish training results
