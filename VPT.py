@@ -38,4 +38,4 @@ class Prompt(nn.Module):
         B, N, C = x.shape
         cls_token, patches = x[:, :1, :], x[:, 1:, :]  # Separate cls_token and patches
         prompt_embeddings = self.prompt_embeddings[layer_idx].unsqueeze(0).expand(B, -1, -1)
-        return torch.cat([cls_token, prompt_embeddings, patches], dim=1)
+        return torch.cat([cls_token, prompt_embeddings, patches], dim=1) # cls_token, prompts, tokens
