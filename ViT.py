@@ -115,7 +115,7 @@ class Block(nn.Module):
 # Define the ViT model
 class ViT(nn.Module):
     def __init__(self, img_size=32, patch_size=4, in_chans=3, num_classes=10, embed_dim=192, depth=12,
-                 num_heads=12, mlp_ratio=2., qkv_bias=False, drop_rate=0., attn_drop_rate=0.):
+                 num_heads=12, mlp_ratio=2., qkv_bias=False, drop_rate=0., attn_drop_rate=0., num_prompts=10): # Define the number of prompts for each layer of the ViT
         super().__init__()
         self.num_classes = num_classes
         self.num_features = self.embed_dim = embed_dim  # num_features for consistency with other models
@@ -135,6 +135,10 @@ class ViT(nn.Module):
         # Define the Classification Head
         # Reduce the dimension to num of classes for classifying
         self.head = nn.Linear(self.num_features, num_classes) if num_classes > 0 else nn.Identity()
+
+        # Define the Prompts
+        self.visual_prompt = VisualPrompt(depth, num_prompts=num_prompts, embed_dim=embed_dim)
+
 
     def forward(self, x):
         x = self.patch_embed(x)
