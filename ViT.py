@@ -12,6 +12,8 @@ from timm.models.layers import trunc_normal_
 from torchvision.datasets.cifar import CIFAR10
 from tensorboardX import SummaryWriter
 
+from VPT import VisualPrompt # imports the Visual Prompt Deep module from the VPT file
+
 
 """
     2. Define the ViT Model
