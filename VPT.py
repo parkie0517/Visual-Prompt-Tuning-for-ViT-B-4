@@ -13,7 +13,7 @@ import torch.nn.init as init
 
 
 class Prompt(nn.Module):
-    def __init__(self, num_layers, num_prompts, embed_dim):
+    def __init__(self, num_layers=12, num_prompts=50, embed_dim=768):
         super(Prompt, self).__init__()
         self.num_layers = num_layers
         self.num_prompts = num_prompts
@@ -24,17 +24,18 @@ class Prompt(nn.Module):
         self.initialize_embeddings()
 
 
+
     def initialize_embeddings(self):
         """
         Performs Xavier initialization to the prompt embeddings
         """
-        for embedding in self.prompt_embeddings:
-            init.xavier_uniform_(embedding)  # Xavier uniform initialization
+        torch.nn.init.xavier_uniform_(self.prompt_embeddings)
 
-
+    
     def forward(self, x, layer_idx):
         if layer_idx >= self.num_layers:
             return x
         B, N, C = x.shape
+        cls_token, patches = x[:, :1, :], x[:, 1:, :]  # Separate cls_token and patches
         prompt_embeddings = self.prompt_embeddings[layer_idx].unsqueeze(0).expand(B, -1, -1)
-        return torch.cat([prompt_embeddings, x], dim=1)
+        return torch.cat([cls_token, prompt_embeddings, patches], dim=1)
