@@ -11,9 +11,9 @@ import torch
 import torch.nn as nn
 
 
-class VisualPrompt(nn.Module):
+class Prompt(nn.Module):
     def __init__(self, num_layers, num_prompts, embed_dim):
-        super(VisualPrompt, self).__init__()
+        super(Prompt, self).__init__()
         self.num_layers = num_layers
         self.num_prompts = num_prompts
         self.embed_dim = embed_dim

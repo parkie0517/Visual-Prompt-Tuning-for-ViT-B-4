@@ -12,7 +12,7 @@ from timm.models.layers import trunc_normal_
 from torchvision.datasets.cifar import CIFAR10
 from tensorboardX import SummaryWriter
 
-from VPT import VisualPrompt # imports the Visual Prompt Deep module from the VPT file
+from VPT import Prompt # imports the Visual Prompt Deep module from the VPT file
 
 
 """
@@ -137,7 +137,7 @@ class ViT(nn.Module):
         self.head = nn.Linear(self.num_features, num_classes) if num_classes > 0 else nn.Identity()
 
         # Define the Prompts
-        self.visual_prompt = VisualPrompt(depth, num_prompts=num_prompts, embed_dim=embed_dim)
+        self.prompt = Prompt(depth, num_prompts=num_prompts, embed_dim=embed_dim)
 
 
     def forward(self, x):
