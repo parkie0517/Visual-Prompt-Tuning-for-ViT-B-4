@@ -20,7 +20,7 @@ from VPT import Prompt # imports the Visual Prompt Deep module from the VPT file
 """
 # Define the Embedding Layer
 class EmbeddingLayer(nn.Module):
-    def __init__(self, in_chans, embed_dim, img_size, patch_size):
+    def __init__(self, in_chans, embed_dim, img_size, patch_size, trainable_pos_embed=False):
         super().__init__()
         self.num_tokens = (img_size // patch_size) ** 2
         self.embed_dim = embed_dim
@@ -32,6 +32,9 @@ class EmbeddingLayer(nn.Module):
 
         nn.init.normal_(self.cls_token, std=1e-6) # Initialize classfication token using normal(Gaussian) distibution
         trunc_normal_(self.pos_embed, std=.02) # Initialize positional embeddings using truncated normal distribution
+
+        if trainable_pos_embed:
+            self.pos_embed.requires_grad = True # Allow positional embeddings to be trainable
 
     def forward(self, x): # Define the forward function
         B, C, H, W = x.shape
@@ -141,9 +144,27 @@ class ViT(nn.Module):
 
 
     def forward(self, x):
+        """
+        The forward function for the VPT code.
+        Very simple! The overview of the forward() is given below.
+            1. Receive the input image (this would actually be a batch of images)
+            2. Embed the image into patches
+            3. Input the cls_token, prompts, patches into the encoder (uses a for loop)
+            4. Apply LN to the output of the encoder
+            5. Pass the cls_token into the MLP head
+        """
+
         x = self.patch_embed(x)
-        x = self.blocks(x)
-        x = self.norm(x)
+
+        # The code below is now changed to 'for loop'
+        # For loop
+        # x = self.blocks(x)
+        for i, block in enumerate(self.blocks):
+            x = self.visual_prompt(x, layer_idx=i)
+            x = block(x)
+        
+
+        x = self.norm(x) # Apply layer normalization to the output of the encoder!
         x = x[:, 0] # Select the first token from each sequence, which is the classification token  
         x = self.head(x) # pass the first token into the classification head
         return x
@@ -198,8 +219,9 @@ def main():
                              batch_size=ops.batch_size)
 
     # Create the model instance
-    model = ViT().to(device)
-    
+    model = ViT(num_prompts=10, trainable_pos_embed=True) # Create the VPT model
+    model = model.to(device) # Move the model to the specified device
+
     # Set information about the training process
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(),
