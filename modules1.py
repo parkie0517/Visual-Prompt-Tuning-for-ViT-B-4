@@ -19,15 +19,10 @@ import torchvision.transforms as tfs
 from torch.utils.data import DataLoader
 from timm.models.layers import trunc_normal_
 from torchvision.datasets.cifar import CIFAR10
-from tensorboardX import SummaryWriter
-
 from VPT import Prompt # imports the Visual Prompt Deep module from the VPT file
 import timm
 
-"""
-    2. Define the ViT Model
-"""
-# Define the Embedding Layer
+
 class EmbeddingLayer(nn.Module):
     def __init__(self, in_chans, embed_dim, img_size, patch_size, trainable_pos_embed=False):
         super().__init__()

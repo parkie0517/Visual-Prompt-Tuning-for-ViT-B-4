@@ -17,7 +17,7 @@ import argparse
 from torch.utils.data import DataLoader
 from torchvision.datasets.cifar import CIFAR10
 
-
+from VPT
 
 
 def main():
@@ -32,7 +32,7 @@ def main():
     parser.add_argument('--rank', type=int, default=0)
     ops = parser.parse_args()
     print(ops.epoch)
-    
+
     """
     Step 2: Load CIFAR-10 dataset
     """
@@ -44,10 +44,11 @@ def main():
                         std=(0.2023, 0.1994, 0.2010)),
     ])
 
-    test_transform_cifar = transforms.Compose([transforms.ToTensor(),
-                                        transforms.Normalize(mean=(0.4914, 0.4822, 0.4465),
-                                                        std=(0.2023, 0.1994, 0.2010)),
-                                        ])
+    test_transform_cifar = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize(mean=(0.4914, 0.4822, 0.4465),
+                        std=(0.2023, 0.1994, 0.2010)),
+        ])
     train_set = CIFAR10(root=ops.root,
                         train=True,
                         download=True,
