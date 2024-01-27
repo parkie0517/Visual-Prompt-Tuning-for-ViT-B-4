@@ -6,3 +6,10 @@ The dataset required for fine-tuning will be CIFAR-10.
 Let's begin!  
 """
 
+"""
+Step 1: Import necessary libraries
+"""
+import torch
+import torch.nn as nn
+import timm
+from torchvision import datasets, transforms
