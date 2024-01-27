@@ -32,6 +32,7 @@ def main():
     parser.add_argument('--rank', type=int, default=0)
     ops = parser.parse_args()
     print(ops.epoch)
+    
     """
     Step 2: Load CIFAR-10 dataset
     """
