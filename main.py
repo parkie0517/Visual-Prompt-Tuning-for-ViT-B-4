@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 from timm.models.layers import trunc_normal_
 from torchvision.datasets.cifar import CIFAR10
 from tensorboardX import SummaryWriter
-
+import timm
 
 """
     2. Define the ViT Model
@@ -140,6 +140,39 @@ class ViT(nn.Module):
         x = self.norm(x)
         x = x[:, 0] # Select the first token from each sequence, which is the classification token  
         x = self.head(x) # pass the first token into the classification head
+        return x
+    
+
+class CustomPatchEmbedding(nn.Module):
+    def __init__(self, img_size=32, patch_size=4, in_chans=3, embed_dim=768):
+        super().__init__()
+        self.img_size = img_size
+        self.patch_size = patch_size
+        self.n_patches = (img_size // patch_size) ** 2
+
+        self.proj = nn.Conv2d(in_chans, embed_dim, kernel_size=patch_size, stride=patch_size)
+
+    def forward(self, x):
+        x = self.proj(x)  # B, C, H, W -> B, E, H/P, W/P
+        x = x.flatten(2)  # B, E, N (N is the number of patches)
+        x = x.transpose(1, 2)  # B, N, E
+        return x
+
+
+class CustomViT(nn.Module):
+    def __init__(self, num_classes=10, img_size=32, patch_size=4, in_chans=3, embed_dim=768, pretrained_model_name='vit_base_patch16_224_in21k'):
+        super().__init__()
+        # Load the pre-trained ViT model
+        self.model = timm.create_model(pretrained_model_name, pretrained=False)  # Turn off pretrained weights
+        
+        # Replace the patch embedding
+        self.model.patch_embed = CustomPatchEmbedding(img_size=img_size, patch_size=patch_size, in_chans=in_chans, embed_dim=embed_dim)
+        
+        # Replace the classifier head
+        self.model.head = nn.Linear(embed_dim, num_classes)
+
+    def forward(self, x):
+        x = self.model(x)
         return x
 
 def main():
