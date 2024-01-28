@@ -55,7 +55,7 @@ def main():
     """
     3. Define the ViT Model
     """
-    # Create the custom model!
+    # Create the custom model
     model = CustomViT(pretrained_model = 'vit_base_patch16_224', 
                           img_size=32, 
                           patch_size=4, 
@@ -63,8 +63,18 @@ def main():
                           )
     model = model.to(device) # Upload the model to the specified device
 
+    # Freeze the enocder part
+    for name, param in model.named_parameters():
+        if 'blocks' in name:
+            param.requires_grad = False # Set the parameter untrainable
     
-    # Uncomment the comment block below to check if the model works well!
+    # Cheeck if the freezing procedure is properly executed
+    for name, param in model.named_parameters():
+        print(f"{name}: {'trainable' if param.requires_grad else 'frozen'}")
+
+
+    # Uncomment the block below to check if the model works well!
+    """
     batch_size=10
     x = torch.randn(batch_size, 3, 32, 32)
     x = x.to(device)
@@ -73,7 +83,13 @@ def main():
     output = m(output)
     print(output.shape)
     print(output)
-    
+    """
+
+    # uncomment the block below to print out shapes of the model's parameters
+    """
+    for name, param in model.named_parameters():
+        print(f"{name}: {param.shape}")
+    """
 
 
     # Set information about the training process
