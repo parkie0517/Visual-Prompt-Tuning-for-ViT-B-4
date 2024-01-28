@@ -142,6 +142,11 @@ class ViT(nn.Module):
         x = self.head(x) # pass the first token into the classification head
         return x
 
+class CustomViT(nn.Module):
+    def __init__(self, img_size=32, patch_size=4, in_chans=3, num_classes=10, embed_dim=192, depth=12,
+                 num_heads=12, mlp_ratio=2., qkv_bias=False, drop_rate=0., attn_drop_rate=0.):
+        pass
+
 def main():
     # argparser
     parer = argparse.ArgumentParser()
