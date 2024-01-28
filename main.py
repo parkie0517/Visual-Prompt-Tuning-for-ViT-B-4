@@ -16,7 +16,7 @@ from CustomVPT import CustomPrompts, CustomViT # Custom class used for modifying
 def main():
     # Argument Parser = argument comprehender
     parer = argparse.ArgumentParser()
-    parer.add_argument('--epoch', type=int, default=0)
+    parer.add_argument('--epoch', type=int, default=2)
     parer.add_argument('--batch_size', type=int, default=128)
     parer.add_argument('--lr', type=float, default=0.001)
     parer.add_argument('--step_size', type=int, default=100)
@@ -67,10 +67,11 @@ def main():
         if 'blocks' in name:
             param.requires_grad = False # Set the parameter untrainable
     
-    # Cheeck if the freezing procedure is properly executed
+    # Uncomment the block below to cheeck if the freezing procedure is properly executed
+    """
     for name, param in model.named_parameters():
         print(f"{name}: {'trainable' if param.requires_grad else 'frozen'}")
-
+    """
 
     # Uncomment the block below to check if the model works well!
     """
@@ -84,42 +85,46 @@ def main():
     print(output)
     """
 
-    # uncomment the block below to print out shapes of the model's parameters
+    # uncomment the block below to print out the shapes of the model's parameters
     """
     for name, param in model.named_parameters():
         print(f"{name}: {param.shape}")
     """
 
 
-    # Set information about the training process
-    criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(),
-                                 lr=ops.lr,
-                                 weight_decay=5e-5)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=ops.epoch, eta_min=1e-5)
-    os.makedirs(ops.log_dir, exist_ok=True)
-
     """
     4. Training and Testing
     """
-    print("training...")
-    for epoch in range(ops.epoch):
 
-        model.train()
-        tic = time.time()
+    # Set information about the training process
+    criterion = nn.CrossEntropyLoss() # Softmax + cross entropy loss
+    optimizer = torch.optim.Adam(model.parameters(), lr=ops.lr, weight_decay=5e-5)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=ops.epoch, eta_min=1e-5)
+    # os.makedirs(ops.log_dir, exist_ok=True)
+
+
+    for epoch in range(ops.epoch):
+        model.train() # Change to training mode
+        train_total = 0
+        train_correct = 0
+        train_loss = 0.0
+
         for idx, (img, target) in enumerate(train_loader):
             img = img.to(device)  # [N, 3, 32, 32]
             target = target.to(device)  # [N]
-            # output, attn_mask = model(img, True)  # [N, 10]
+
+            optimizer.zero_grad() # Use this to clear the old gradients
             output = model(img)  # [N, 10]
             loss = criterion(output, target)
 
-            optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
-            for param_group in optimizer.param_groups:
-                lr = param_group['lr']
+
+            train_loss += loss.item() * img.size(0)
+            _, predicted = torch.max(output.data, 1)
+            train_total += target.size(0)
+            train_correct += (predicted == target).sum().item()
 
 
         # Save the trained models
