@@ -37,14 +37,13 @@ def main():
         tfs.RandomCrop(32, padding=4),
         tfs.RandomHorizontalFlip(),
         tfs.ToTensor(),
-        tfs.Normalize(mean=(0.4914, 0.4822, 0.4465),
-                      std=(0.2023, 0.1994, 0.2010)),
-    ])
+        tfs.Normalize(mean=(0.4914, 0.4822, 0.4465), std=(0.2023, 0.1994, 0.2010)),
+        ])
 
-    test_transform_cifar = tfs.Compose([tfs.ToTensor(),
-                                        tfs.Normalize(mean=(0.4914, 0.4822, 0.4465),
-                                                      std=(0.2023, 0.1994, 0.2010)),
-                                        ])
+    test_transform_cifar = tfs.Compose([
+        tfs.ToTensor(),
+        tfs.Normalize(mean=(0.4914, 0.4822, 0.4465), std=(0.2023, 0.1994, 0.2010)),
+        ])
     
     train_set = CIFAR10(root=ops.root, train=True, download=True, transform=transform_cifar)
     test_set = CIFAR10(root=ops.root, train=False, download=True, transform=test_transform_cifar)
