@@ -149,39 +149,16 @@ class ViT(nn.Module):
 import timm
 
 
-class CustomPatchEmbedding(nn.Module):
-    def __init__(self, in_chans=3, embed_dim=768, img_size=32, patch_size=4):
-        super().__init__()
-        self.num_tokens = (img_size // patch_size) ** 2
-        self.embed_dim = embed_dim
-        self.project = nn.Conv2d(in_chans, embed_dim, kernel_size=patch_size, stride=patch_size) # Using Conv2d operation to perform linear projection
-
-        self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dim)) # Create a classification token (used later for classifying the image)
-        self.num_tokens += 1
-        self.pos_embed = nn.Parameter(torch.zeros(1, self.num_tokens, self.embed_dim)) # Create positional embedding parameters
-
-        nn.init.normal_(self.cls_token, std=1e-6) # Initialize classfication token using normal(Gaussian) distibution
-        trunc_normal_(self.pos_embed, std=.02) # Initialize positional embeddings using truncated normal distribution
-
-    def forward(self, x): # Define the forward function
-        B, C, H, W = x.shape
-        embedding = self.project(x) # Perform Linear projection (=tokenization of the image)
-        z = embedding.view(B, self.embed_dim, -1).permute(0, 2, 1)  # BCHW -> BNC
-
-        # Add the classification token
-        cls_tokens = self.cls_token.expand(B, -1, -1)
-        z = torch.cat([cls_tokens, z], dim=1)
-
-        # Add the position embedding
-        z = z + self.pos_embed
-        return z
-
 class CustomViT(nn.Module):
     def __init__(self, pretrained_model='vit_base_patch16_224',img_size=32, patch_size=4, in_chans=3, num_classes=10, embed_dim=768, depth=12,
                  num_heads=12, mlp_ratio=4., qkv_bias=False, drop_rate=0., attn_drop_rate=0.): # get rid of unecessary parameters
         super().__init__()
-        self.model = timm.create_model('vit_base_patch16_224', pretrained=True)
-        self.model.patch_embed = CustomPatchEmbedding()
+        self.model = timm.create_model('vit_base_patch16_224', 
+                          img_size=32, 
+                          patch_size=4, 
+                          num_classes=10, 
+                          pretrained=True,
+                          )
     
     def forward():
         pass # Under construction!

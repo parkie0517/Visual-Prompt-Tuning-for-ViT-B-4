@@ -18,6 +18,8 @@ model = timm.create_model('vit_base_patch16_224',
 #print(forward_source_code)
 #print(model)
 
+# print out name of the modules and parameter shapes
+"""
 # Iterate through all named modules
 for module_name, module in model.named_modules():
     print(f"Module: {module_name}")
@@ -25,3 +27,8 @@ for module_name, module in model.named_modules():
     # Iterate through all named parameters of the module
     for param_name, param in module.named_parameters():
         print(f"\tParameter: {param_name}, Shape: {param.shape}")
+"""
+
+# Print out shapes of the parameters
+for name, param in model.named_parameters():
+    print(f"{name}: {param.shape}")
