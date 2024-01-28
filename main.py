@@ -282,8 +282,8 @@ def main():
 
     
     # Uncomment the comment block below to check if the model works well!
-    
-    x = torch.randn(1, 3, 32, 32)
+    batch_size=10
+    x = torch.randn(batch_size, 3, 32, 32)
     x = x.to(device)
     output = model(x)
     m = torch.nn.Softmax(dim=1)
