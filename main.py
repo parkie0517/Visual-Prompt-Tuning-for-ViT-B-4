@@ -16,7 +16,7 @@ from CustomVPT import CustomPrompts, CustomViT # Custom class used for modifying
 def main():
     # Argument Parser = argument comprehender
     parer = argparse.ArgumentParser()
-    parer.add_argument('--epoch', type=int, default=2)
+    parer.add_argument('--epoch', type=int, default=3)
     parer.add_argument('--batch_size', type=int, default=128)
     parer.add_argument('--lr', type=float, default=0.001)
     parer.add_argument('--step_size', type=int, default=100)
@@ -98,12 +98,16 @@ def main():
 
     # Set information about the training process
     criterion = nn.CrossEntropyLoss() # Softmax + cross entropy loss
-    optimizer = torch.optim.Adam(model.parameters(), lr=ops.lr, weight_decay=5e-5)
+    # optimizer = torch.optim.Adam(model.parameters(), lr=ops.lr, weight_decay=5e-5)
+    optimizer = torch.optim.Adam(
+        filter(lambda p: p.requires_grad, model.parameters()),
+        lr=ops.lr, weight_decay=5e-5
+    )
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=ops.epoch, eta_min=1e-5)
     # os.makedirs(ops.log_dir, exist_ok=True)
 
 
-    for epoch in range(ops.epoch):
+    for epoch in range(1, ops.epoch+1):
         model.train() # Change to training mode
         train_total = 0
         train_correct = 0
@@ -125,8 +129,16 @@ def main():
             _, predicted = torch.max(output.data, 1)
             train_total += target.size(0)
             train_correct += (predicted == target).sum().item()
+        
+        train_acc = 100 * train_correct / train_total
+        train_avg_loss = train_loss / train_total
+        print(f"Epoch {epoch}/{ops.epoch} - Training Accuracy: {train_acc:.4f}%, Training Avg Loss: {train_avg_loss:.4f}")
+        
+        # TensorBoard logging for training metrics
+        writer.add_scalar('Acc/train_acc', train_acc, epoch)
+        writer.add_scalar('Loss/train_loss', train_avg_loss, epoch)
 
-
+        """
         # Save the trained models
         save_path = os.path.join(ops.log_dir, ops.name, 'saves')
         os.makedirs(save_path, exist_ok=True)
@@ -137,9 +149,9 @@ def main():
                       'scheduler_state_dict': scheduler.state_dict()}
 
         torch.save(checkpoint, os.path.join(save_path, ops.name + '.{}.pth.tar'.format(epoch)))
+        """
 
         # Test the model performance
-        print('Validation of epoch [{}]'.format(epoch))
         model.eval()
         correct = 0
         val_avg_loss = 0
@@ -159,24 +171,22 @@ def main():
                 correct += torch.eq(target, idx_).sum().item()
                 total += target.size(0)
                 val_avg_loss += loss.item()
+        
 
-        print('Epoch {} test : '.format(epoch))
-        accuracy = correct / total
-        print("accuracy : {:.4f}%".format(accuracy * 100.))
-
+        val_accuracy = 100*correct / total
         val_avg_loss = val_avg_loss / len(test_loader)
-        print("avg_loss : {:.4f}".format(val_avg_loss))
-
+        print(f"Epoch {epoch}/{ops.epoch} - Validation Accuracy: {val_accuracy:.4f}%, Validation Avg Loss: {val_avg_loss:.4f}")
+        
 
         scheduler.step()
         # Use tensorboard to record the validation acc and loss
-        writer.add_scalar('valudation accuracy', accuracy, epoch) # use add_scalar() function to write
-        writer.add_scalar('valudation loss', val_avg_loss, epoch)
+        writer.add_scalar('Acc/val_acc', val_accuracy, epoch) # use add_scalar() function to write
+        writer.add_scalar('Loss/val_loss', val_avg_loss, epoch)
     writer.flush()
     
 
 
 if __name__ == '__main__':
-    writer = SummaryWriter('./logs/') # Write training results in './logs/' directory
+    writer = SummaryWriter('./logs/test/first_test') # Write training results in './logs/' directory
     main()
     writer.close() # Must include this code when finish training results
