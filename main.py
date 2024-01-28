@@ -147,6 +147,44 @@ class ViT(nn.Module):
 ###################################################################################
         
 import timm
+import math
+
+class CustomPrompts(nn.Module):
+    def __init__(self, num_prompts=50, prompt_dim=768):
+        super().__init__()
+        # Calculate the value for Xavier Uniform initialization
+        val = math.sqrt(6 / (prompt_dim + prompt_dim))  # Assuming fan_in and fan_out are both equal to prompt_dim
+
+        # Initialize prompt embeddings
+        self.prompt_embeddings = nn.Parameter(torch.zeros(1, num_prompts, prompt_dim))
+        nn.init.uniform_(self.prompt_embeddings, -val, val)  # Xavier Uniform initialization
+
+
+
+    def incorporate_prompt(self, x):
+        """
+        combine prompt embeddings with image-patch embeddings
+        x: input batch of images
+        """
+        B = x.shape[0] # number of the images in the batch
+        # after CLS token, all before image patches
+        """
+        the embedding function is inherited from the Transformer class
+        this function outputs the embeddings called x. 
+        x has a shape of (batch_size, cls_token + n_patches, hidden_dim)
+        """
+        x = self.embeddings(x) # patch embedding  
+        """
+        the cat function outputs a tensor called x.
+        x has a shape of (batch_size, cls_token + n_prompt + n_patches, hidden_dim)
+        """
+        x = torch.cat((
+                x[:, :1, :], # cls_token
+                self.prompt_dropout(self.prompt_proj(self.prompt_embeddings).expand(B, -1, -1)), # expands the prompts to the match the batch size
+                x[:, 1:, :] # patch_embeddings
+            ), dim=1)
+        
+        return x
 
 
 class CustomViT(nn.Module):
@@ -162,9 +200,23 @@ class CustomViT(nn.Module):
                           pretrained=True,
                           )
     
-    def forward(self, x):
-        x = self.model(x)
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = self.forward_features(x)
+        x = self.model.forward_head(x)
         return x
+    
+
+    def forward_features(self, x: torch.Tensor) -> torch.Tensor:
+            x = self.model.patch_embed(x)
+            x = self.model._pos_embed(x)
+            x = self.model.patch_drop(x)
+            x = self.model.norm_pre(x)
+
+            for idx, block in enumerate(self.model.blocks):
+                x = block(x)
+
+            x = self.model.norm(x)
+            return x
 
 def main():
     # argparser
@@ -215,15 +267,25 @@ def main():
                              shuffle=False,
                              batch_size=ops.batch_size)
 
-    # Create the model instance
-    # model = ViT().to(device)
-    model = CustomViT()
+    # Create the custom model!
+    model = CustomViT(pretrained_model = 'vit_base_patch16_224', 
+                          img_size=32, 
+                          patch_size=4, 
+                          num_classes=10,
+                          )
+    model = model.to(device) # Upload the model to the specified device
+
+    
+    # Uncomment the comment block below to check if the model works well!
+    
     x = torch.randn(1, 3, 32, 32)
+    x = x.to(device)
     output = model(x)
     m = torch.nn.Softmax(dim=1)
     output = m(output)
     print(output.shape)
     print(output)
+    
 
 
     # Set information about the training process
