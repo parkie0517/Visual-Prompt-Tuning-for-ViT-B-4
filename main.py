@@ -2,8 +2,9 @@
     1. Import Libraries
 """
 import os
-import time
 import torch
+import timm
+import math
 import argparse
 import torch.nn as nn
 import torchvision.transforms as tfs
@@ -12,13 +13,10 @@ from timm.models.layers import trunc_normal_
 from torchvision.datasets.cifar import CIFAR10
 from tensorboardX import SummaryWriter
 
-import timm
-import math
 
 """
     2. Define the ViT Model
 """
-
 
 class CustomPrompts(nn.Module):
     def __init__(self, num_prompts=50, prompt_dim=768, num_layers=12):
@@ -97,7 +95,7 @@ class CustomViT(nn.Module):
 def main():
     # argparser
     parer = argparse.ArgumentParser()
-    parer.add_argument('--epoch', type=int, default=0)
+    parer.add_argument('--epoch', type=int, default=2)
     parer.add_argument('--batch_size', type=int, default=128)
     parer.add_argument('--lr', type=float, default=0.001)
     parer.add_argument('--step_size', type=int, default=100)
