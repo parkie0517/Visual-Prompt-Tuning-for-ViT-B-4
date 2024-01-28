@@ -1,3 +1,7 @@
+import torch
+import torch.nn as nn
+import math
+import timm
 
 class CustomPrompts(nn.Module):
     def __init__(self, num_prompts=50, prompt_dim=768, num_layers=12):

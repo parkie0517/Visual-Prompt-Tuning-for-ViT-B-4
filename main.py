@@ -3,8 +3,6 @@
 """
 import os
 import torch
-import timm
-import math
 import argparse
 import torch.nn as nn
 import torchvision.transforms as tfs
