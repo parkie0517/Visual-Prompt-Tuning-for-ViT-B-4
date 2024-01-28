@@ -150,39 +150,38 @@ import timm
 import math
 
 class CustomPrompts(nn.Module):
-    def __init__(self, num_prompts=50, prompt_dim=768):
+    def __init__(self, num_prompts=50, prompt_dim=768, num_layers=12):
         super().__init__()
+        self.num_prompts = num_prompts
         # Calculate the value for Xavier Uniform initialization
         val = math.sqrt(6 / (prompt_dim + prompt_dim))  # Assuming fan_in and fan_out are both equal to prompt_dim
 
         # Initialize prompt embeddings
-        self.prompt_embeddings = nn.Parameter(torch.zeros(1, num_prompts, prompt_dim))
+        self.prompt_embeddings = nn.Parameter(torch.zeros(1, num_layers, num_prompts, prompt_dim)) #  Batch, Num_layers, Num_prompts, Prompt_dim
         nn.init.uniform_(self.prompt_embeddings, -val, val)  # Xavier Uniform initialization
 
 
-
-    def incorporate_prompt(self, x):
+    def incorporate_prompt(self, x, layer_num):
         """
         combine prompt embeddings with image-patch embeddings
         x: input batch of images
         """
         B = x.shape[0] # number of the images in the batch
-        # after CLS token, all before image patches
-        """
-        the embedding function is inherited from the Transformer class
-        this function outputs the embeddings called x. 
-        x has a shape of (batch_size, cls_token + n_patches, hidden_dim)
-        """
-        x = self.embeddings(x) # patch embedding  
-        """
-        the cat function outputs a tensor called x.
-        x has a shape of (batch_size, cls_token + n_prompt + n_patches, hidden_dim)
-        """
-        x = torch.cat((
+        
+
+        if layer_num == 0: # if the input needs to go through the first block
+            """
+            the cat function outputs a tensor called x.
+            x has a shape of (batch_size, cls_token + n_prompt + n_patches, hidden_dim)
+            """
+            x = torch.cat((
                 x[:, :1, :], # cls_token
-                self.prompt_dropout(self.prompt_proj(self.prompt_embeddings).expand(B, -1, -1)), # expands the prompts to the match the batch size
+                self.prompt_embeddings[:,0, ].expand(B, -1, -1), # expands the prompts to the match the batch size
                 x[:, 1:, :] # patch_embeddings
             ), dim=1)
+
+        else: # if the input needs to go through the the blocks other than the first block
+            x[:, 1:self.num_prompts,:] = self.prompt_embeddings[:,layer_num, ].expand(B, -1, -1)
         
         return x
 
