@@ -10,17 +10,13 @@ from torch.utils.data import DataLoader
 from timm.models.layers import trunc_normal_
 from torchvision.datasets.cifar import CIFAR10
 from tensorboardX import SummaryWriter
-from CustomVPT import CustomPrompts, CustomViT
-
-"""
-    2. Define the ViT Model
-"""
+from CustomVPT import CustomPrompts, CustomViT # Custom class used for modifying the pre-trained ViT-B/16
 
 
 def main():
-    # argparser
+    # Argument Parser = argument comprehender
     parer = argparse.ArgumentParser()
-    parer.add_argument('--epoch', type=int, default=2)
+    parer.add_argument('--epoch', type=int, default=0)
     parer.add_argument('--batch_size', type=int, default=128)
     parer.add_argument('--lr', type=float, default=0.001)
     parer.add_argument('--step_size', type=int, default=100)
@@ -30,11 +26,12 @@ def main():
     parer.add_argument('--rank', type=int, default=0)
     ops = parer.parse_args()
 
-    device = torch.device('cuda:{}'.format(0) if torch.cuda.is_available() else 'cpu')
+    # CUDA setting
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f'currently using {device}')
 
     """
-    3. Load CIFAR10 dataset
+    2. Load CIFAR10 dataset
     """
     transform_cifar = tfs.Compose([
         tfs.RandomCrop(32, padding=4),
@@ -48,24 +45,16 @@ def main():
                                         tfs.Normalize(mean=(0.4914, 0.4822, 0.4465),
                                                       std=(0.2023, 0.1994, 0.2010)),
                                         ])
-    train_set = CIFAR10(root=ops.root,
-                        train=True,
-                        download=True,
-                        transform=transform_cifar)
+    
+    train_set = CIFAR10(root=ops.root, train=True, download=True, transform=transform_cifar)
+    test_set = CIFAR10(root=ops.root, train=False, download=True, transform=test_transform_cifar)
 
-    test_set = CIFAR10(root=ops.root,
-                       train=False,
-                       download=True,
-                       transform=test_transform_cifar)
+    train_loader = DataLoader(dataset=train_set, shuffle=True, batch_size=ops.batch_size)
+    test_loader = DataLoader(dataset=test_set, shuffle=False, batch_size=ops.batch_size)
 
-    train_loader = DataLoader(dataset=train_set,
-                              shuffle=True,
-                              batch_size=ops.batch_size)
-
-    test_loader = DataLoader(dataset=test_set,
-                             shuffle=False,
-                             batch_size=ops.batch_size)
-
+    """
+    3. Define the ViT Model
+    """
     # Create the custom model!
     model = CustomViT(pretrained_model = 'vit_base_patch16_224', 
                           img_size=32, 
