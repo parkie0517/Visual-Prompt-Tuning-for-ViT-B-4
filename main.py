@@ -153,20 +153,23 @@ class CustomViT(nn.Module):
     def __init__(self, pretrained_model='vit_base_patch16_224',img_size=32, patch_size=4, in_chans=3, num_classes=10, embed_dim=768, depth=12,
                  num_heads=12, mlp_ratio=4., qkv_bias=False, drop_rate=0., attn_drop_rate=0.): # get rid of unecessary parameters
         super().__init__()
-        self.model = timm.create_model('vit_base_patch16_224', 
-                          img_size=32, 
-                          patch_size=4, 
-                          num_classes=10, 
+
+        # Define the pre-trained model with some modifications
+        self.model = timm.create_model(pretrained_model, 
+                          img_size=img_size, 
+                          patch_size=patch_size, 
+                          num_classes=num_classes, 
                           pretrained=True,
                           )
     
-    def forward():
-        pass # Under construction!
+    def forward(self, x):
+        x = self.model(x)
+        return x
 
 def main():
     # argparser
     parer = argparse.ArgumentParser()
-    parer.add_argument('--epoch', type=int, default=50)
+    parer.add_argument('--epoch', type=int, default=0)
     parer.add_argument('--batch_size', type=int, default=128)
     parer.add_argument('--lr', type=float, default=0.001)
     parer.add_argument('--step_size', type=int, default=100)
@@ -213,8 +216,16 @@ def main():
                              batch_size=ops.batch_size)
 
     # Create the model instance
-    model = ViT().to(device)
-    
+    # model = ViT().to(device)
+    model = CustomViT()
+    x = torch.randn(1, 3, 32, 32)
+    output = model(x)
+    m = torch.nn.Softmax(dim=1)
+    output = m(output)
+    print(output.shape)
+    print(output)
+
+
     # Set information about the training process
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(),
