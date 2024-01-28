@@ -1,5 +1,5 @@
 """
-    1. Import Libraries
+Step 1: Import Libraries
 """
 import os
 import torch
@@ -31,7 +31,7 @@ def main():
     print(f'currently using {device}')
 
     """
-    2. Load CIFAR10 dataset
+    Step 2: Load CIFAR10 dataset
     """
     transform_cifar = tfs.Compose([
         tfs.RandomCrop(32, padding=4),
