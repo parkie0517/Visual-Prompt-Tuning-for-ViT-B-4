@@ -195,6 +195,7 @@ class CustomViT(nn.Module):
                  num_heads=12, mlp_ratio=4., qkv_bias=False, drop_rate=0., attn_drop_rate=0.): # get rid of unecessary parameters
         super().__init__()
 
+        self.prompt_embeddings = CustomPrompts(num_prompts=50, prompt_dim=768, num_layers=12) # Create prompt embeddings
         # Define the pre-trained model with some modifications
         self.model = timm.create_model(pretrained_model, 
                           img_size=img_size, 
@@ -215,7 +216,8 @@ class CustomViT(nn.Module):
             x = self.model.patch_drop(x)
             x = self.model.norm_pre(x)
 
-            for idx, block in enumerate(self.model.blocks):
+            for idx, block in enumerate(self.model.blocks): # 0~11
+                x = self.prompt_embeddings.incorporate_prompt(x, idx)
                 x = block(x)
 
             x = self.model.norm(x)
