@@ -16,7 +16,8 @@ from CustomVPT import CustomPrompts, CustomViT # Custom class used for modifying
 def main():
     # Argument Parser = argument comprehender
     parer = argparse.ArgumentParser()
-    parer.add_argument('--epoch', type=int, default=3)
+    parer.add_argument('--full', type=bool, default=False)
+    parer.add_argument('--epoch', type=int, default=5)
     parer.add_argument('--batch_size', type=int, default=128)
     parer.add_argument('--lr', type=float, default=0.001)
     parer.add_argument('--step_size', type=int, default=100)
@@ -63,9 +64,13 @@ def main():
     model = model.to(device) # Upload the model to the specified device
 
     # Freeze the enocder part
-    for name, param in model.named_parameters():
-        if 'blocks' in name:
-            param.requires_grad = False # Set the parameter untrainable
+    if ops.full:
+        print("Full fine-tuning")
+    else:
+        print("Prompt fine-tuning")
+        for name, param in model.named_parameters():
+            if 'blocks' in name:
+                param.requires_grad = False # Set the parameter untrainable
     
     # Uncomment the block below to cheeck if the freezing procedure is properly executed
     """
@@ -95,7 +100,6 @@ def main():
     """
     4. Training and Testing
     """
-
     # Set information about the training process
     criterion = nn.CrossEntropyLoss() # Softmax + cross entropy loss
     # optimizer = torch.optim.Adam(model.parameters(), lr=ops.lr, weight_decay=5e-5)
@@ -108,10 +112,12 @@ def main():
 
 
     for epoch in range(1, ops.epoch+1):
-        model.train() # Change to training mode
+        
         train_total = 0
         train_correct = 0
         train_loss = 0.0
+
+        model.train() # Change to training mode
 
         for idx, (img, target) in enumerate(train_loader):
             img = img.to(device)  # [N, 3, 32, 32]
@@ -152,7 +158,7 @@ def main():
         """
 
         # Test the model performance
-        model.eval()
+        model.eval() # Set to evaluation mode
         correct = 0
         val_avg_loss = 0
         total = 0
@@ -187,6 +193,6 @@ def main():
 
 
 if __name__ == '__main__':
-    writer = SummaryWriter('./logs/test/first_test') # Write training results in './logs/' directory
+    writer = SummaryWriter('./logs/test/full-fine-tuning') # Write training results in './logs/' directory
     main()
     writer.close() # Must include this code when finish training results
