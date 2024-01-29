@@ -1,5 +1,8 @@
 # Visual_Prompt_Tuning_PyTorch
 In this project, I applied Visual Prompt Tuning(VPT) method to the ViT-Base/4 model.  
+I compared two methods which were:  
+- Prompt fine-tune
+- Full fine-tune
 I used a ViT-Base/16 model pre-trained on ImageNet-21k, 
 
 
