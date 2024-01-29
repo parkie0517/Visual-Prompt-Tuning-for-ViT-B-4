@@ -4,7 +4,15 @@ import math
 import timm
 
 class CustomPrompts(nn.Module):
+    """
+    CustomPrompts class is for the following purposes
+        1. Create, initialize, and store propt embeddings
+        2. Incorporate prompts into input embeddings
+    """
     def __init__(self, num_prompts=50, prompt_dim=768, num_layers=12):
+        """
+        Create, initialize, and store prompt embeddings
+        """
         super().__init__()
         self.num_prompts = num_prompts
         # Calculate the value for Xavier Uniform initialization
@@ -45,6 +53,9 @@ class CustomPrompts(nn.Module):
 
 
 class CustomViT(nn.Module):
+    """
+    This is the Custom ViT class for Visual Prompt Tuning!
+    """
     def __init__(self, pretrained_model='vit_base_patch16_224',img_size=32, patch_size=4, in_chans=3, num_classes=10, embed_dim=768, depth=12,
                  num_heads=12, mlp_ratio=4., qkv_bias=False, drop_rate=0., attn_drop_rate=0.): # get rid of unecessary parameters
         super().__init__()
@@ -65,14 +76,18 @@ class CustomViT(nn.Module):
     
 
     def forward_features(self, x: torch.Tensor) -> torch.Tensor:
+            """
+            This function overrides the existing function defined in the pre-trained model.
+            """
             x = self.model.patch_embed(x)
             x = self.model._pos_embed(x)
             x = self.model.patch_drop(x)
             x = self.model.norm_pre(x)
-
+            
+            # Encoder = Blocks x 12
             for idx, block in enumerate(self.model.blocks): # 0~11
-                x = self.prompt_embeddings.incorporate_prompt(x, idx)
+                x = self.prompt_embeddings.incorporate_prompt(x, idx) # Insert prompts in between the cls_token and patch embeddings
                 x = block(x)
 
-            x = self.model.norm(x) # Layer Normalization at the end of the encoder
+            x = self.model.norm(x) # Layer Normalization after the encoder
             return x
