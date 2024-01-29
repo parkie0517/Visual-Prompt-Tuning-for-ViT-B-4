@@ -47,10 +47,10 @@ Orange line: ViT-Base/4 (Prompt Fine-tuning)
 Blue Line: ViT-Base/4 (Full Fine-tuning)
 
 ![image](https://github.com/parkie0517/Visual-Prompt-Tuning-for-ViT-B-4/assets/80407632/bee16f4e-f9a8-4109-bdfd-3877e31672fb)  
-Training Accuracy
+↑ Training Accuracy  
 
 ![image](https://github.com/parkie0517/Visual-Prompt-Tuning-for-ViT-B-4/assets/80407632/4588388f-6e0d-4208-b832-3af20f687b13)  
-Testing Accuracy
+↑ Testing Accuracy  
 
 It took, 5m20s and 6m50s to train the prompted model and full fine-tuned model respectively.  
 Although I did not trian the models for sufficient amount of time, I could observe that the prompted model's convergene speed was very fast compared to the full fine-tuned model which did not even converge during 5 epochs.  
