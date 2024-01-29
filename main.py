@@ -159,9 +159,9 @@ def main():
 
         # Test the model performance
         model.eval() # Set to evaluation mode
-        correct = 0
+        val_correct = 0
         val_avg_loss = 0
-        total = 0
+        val_total = 0
         with torch.no_grad():
 
             for idx, (img, target) in enumerate(test_loader):
@@ -174,20 +174,22 @@ def main():
                 output = torch.softmax(output, dim=1)
                 # first eval
                 pred, idx_ = output.max(-1)
-                correct += torch.eq(target, idx_).sum().item()
-                total += target.size(0)
+                val_correct += torch.eq(target, idx_).sum().item()
+                val_total += target.size(0)
                 val_avg_loss += loss.item()
         
 
-        val_accuracy = 100*correct / total
+        val_accuracy = 100 * val_correct / val_total
         val_avg_loss = val_avg_loss / len(test_loader)
         print(f"Epoch {epoch}/{ops.epoch} - Validation Accuracy: {val_accuracy:.4f}%, Validation Avg Loss: {val_avg_loss:.4f}")
         
 
-        scheduler.step()
+        scheduler.step() # change the lr!
+
         # Use tensorboard to record the validation acc and loss
         writer.add_scalar('Acc/val_acc', val_accuracy, epoch) # use add_scalar() function to write
         writer.add_scalar('Loss/val_loss', val_avg_loss, epoch)
+        
         writer.flush() # make sure flush function is in the loop!
     
 
