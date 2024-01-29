@@ -16,8 +16,8 @@ from CustomVPT import CustomPrompts, CustomViT # Custom class used for modifying
 def main():
     # Argument Parser = argument comprehender
     parer = argparse.ArgumentParser()
-    parer.add_argument('--full', type=bool, default=False)
-    parer.add_argument('--epoch', type=int, default=5)
+    parer.add_argument('--full', type=bool, default=False) # If set to True, the the model will be full fine-tuned
+    parer.add_argument('--epoch', type=int, default=10)
     parer.add_argument('--batch_size', type=int, default=128)
     parer.add_argument('--lr', type=float, default=0.001)
     parer.add_argument('--step_size', type=int, default=100)
@@ -104,10 +104,10 @@ def main():
     criterion = nn.CrossEntropyLoss() # Softmax + cross entropy loss
     # optimizer = torch.optim.Adam(model.parameters(), lr=ops.lr, weight_decay=5e-5)
     optimizer = torch.optim.Adam(
-        filter(lambda p: p.requires_grad, model.parameters()),
+        filter(lambda p: p.requires_grad, model.parameters()), # filter out parameters that are intended to be untrained
         lr=ops.lr, weight_decay=5e-5
     )
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=ops.epoch, eta_min=1e-5)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=ops.epoch, eta_min=1e-5) # Use cosie deacy as lr scheduler
     # os.makedirs(ops.log_dir, exist_ok=True)
 
 
@@ -188,7 +188,7 @@ def main():
         # Use tensorboard to record the validation acc and loss
         writer.add_scalar('Acc/val_acc', val_accuracy, epoch) # use add_scalar() function to write
         writer.add_scalar('Loss/val_loss', val_avg_loss, epoch)
-    writer.flush()
+        writer.flush() # make sure flush function is in the loop!
     
 
 
