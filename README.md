@@ -1,8 +1,8 @@
 # Visual_Prompt_Tuning_PyTorch
 In this project, I applied Visual Prompt Tuning(VPT) method to the ViT-Base/4 model.  
 I used a ViT-Base/16 model pre-trained on ImageNet-21k and used CIFAR-10 for fine-tuning.  
-I compared two methods which were:  
-- Prompt fine-tune
+I compared two methods which were:
+- Prompt fine-tune (97.83% in epoch 5!)
 - Full fine-tune  
 
 
@@ -34,7 +34,7 @@ Below are the implementation details of the ViT-Base/4 model.
 - Layer depth: 12
 
 
-## Experiment Results
+## Experiment results
 The graphs below are training and testing accuracies.  
 Orange line: ViT-Base/4 (Prompt Fine-tuning)
 Blue Line: ViT-Base/4 (Full Fine-tuning)
@@ -46,7 +46,7 @@ Training Accuracy
 Testing Accuracy
 
 It took, 5m20s and 6m50s to train the prompted model and full fine-tuned model respectively.  
-Although I have not trianed the models for a long time, I could observe that the prompted model convergene time was very short compared to the full fine-tuned model.  
+Although I did not trian the models for sufficient amount of time, I could observe that the prompted model's convergene speed was very fast compared to the full fine-tuned model which did not even converge during 5 epochs.  
 
 
 ## Conclusion
