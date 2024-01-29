@@ -195,6 +195,6 @@ def main():
 
 
 if __name__ == '__main__':
-    writer = SummaryWriter('./logs/test/full-fine-tuning') # Write training results in './logs/' directory
+    writer = SummaryWriter('./logs/test/test-run1') # Write training results in './logs/' directory
     main()
     writer.close() # Must include this code when finish training results
