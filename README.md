@@ -20,6 +20,13 @@ I compared two methods which were:
 - Output prediction!
 
 
+## How to use the code
+Follow the steps below to use the code!
+- Type in "python main.py" to use the default training strategy.
+- Add arguments to change the training procedure (epoch, batch size, etc....)  
+  For example, "python main.py --epoch 50 --full False --batch_size 256"
+
+
 ## Implementation details
 ViT-Base/16 was used. I had to modify the embedding layer so that CIFAR-10 could used for training.  
 I modified version is called ViT-Base/4, where 4 denotes the patch size.  
