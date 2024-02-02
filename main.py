@@ -4,6 +4,7 @@ Step 1: Import Libraries
 import os
 import torch
 import argparse
+import timm
 import torch.nn as nn
 import torchvision.transforms as tfs
 from torch.utils.data import DataLoader
@@ -55,22 +56,30 @@ def main():
     """
     3. Define the ViT Model
     """
-    # Create the custom model
-    model = CustomViT(pretrained_model = 'vit_base_patch16_224', 
-                          img_size=32, 
-                          patch_size=4, 
-                          num_classes=10,
-                          )
-    model = model.to(device) # Upload the model to the specified device
 
-    # Freeze the enocder part
+    # VPT or Full Fine-tuning
     if ops.full:
         print("Full fine-tuning")
+        model = timm.create_model('vit_base_patch16_224', 
+                          img_size=32, 
+                            patch_size=4, 
+                            num_classes=10,
+                            pretrained=True,
+                            )
     else:
-        print("Prompt fine-tuning")
+        print("Prompt Fine-tuning")
+        # Create the custom model
+        model = CustomViT(pretrained_model = 'vit_base_patch16_224', 
+                            img_size=32, 
+                            patch_size=4, 
+                            num_classes=10,
+                            )
+        # Freeze the encoder!
         for name, param in model.named_parameters():
             if 'blocks' in name:
-                param.requires_grad = False # Set the parameter untrainable
+                param.requires_grad = False # Set the parameters to untrainable
+    
+    model = model.to(device) # Upload the model to the specified device
     
     # Uncomment the block below to cheeck if the freezing procedure is properly executed
     """
