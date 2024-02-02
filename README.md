@@ -46,10 +46,10 @@ The graphs below are training and testing accuracies.
 Orange line: ViT-Base/4 (Prompt Fine-tuning)
 Blue Line: ViT-Base/4 (Full Fine-tuning)
 
-![image](https://github.com/parkie0517/Visual-Prompt-Tuning-for-ViT-B-4/assets/80407632/bee16f4e-f9a8-4109-bdfd-3877e31672fb)  
+![image](https://github.com/parkie0517/Visual-Prompt-Tuning-for-ViT-B-4/assets/80407632/9cc9c535-fa08-49d8-9b1a-c2edf9f58169)  
 ↑ Training Accuracy  
 
-![image](https://github.com/parkie0517/Visual-Prompt-Tuning-for-ViT-B-4/assets/80407632/4588388f-6e0d-4208-b832-3af20f687b13)  
+![image](https://github.com/parkie0517/Visual-Prompt-Tuning-for-ViT-B-4/assets/80407632/2924ede9-239e-4dc9-8cec-8bcb2eae0d62)  
 ↑ Testing Accuracy  
 
 It took, 5m20s and 6m50s to train the prompted model and full fine-tuned model respectively.  
