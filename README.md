@@ -30,7 +30,7 @@ Follow the steps below to use the code!
 
 ## Implementation details
 ViT-Base/16 was used. I had to modify the embedding layer so that CIFAR-10 could used for training.  
-I modified version is called ViT-Base/4, where 4 denotes the patch size.  
+The modified model is called ViT-Base/4, where 4 denotes the patch size.  
 Below are the implementation details of the ViT-Base/4 model.  
 - Input image size: (3, 32, 32)
 - Patch size: (3, 4, 4)
